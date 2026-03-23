@@ -2,8 +2,10 @@ import axios from 'axios';
 import { auth } from '@/lib/firebase';
 import { getAdminPassword } from '@/lib/adminAuth';
 
+const defaultApiBase = import.meta.env.PROD ? '/api' : 'http://localhost:5000/api';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || defaultApiBase,
   headers: { 'Content-Type': 'application/json' },
 });
 

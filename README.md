@@ -183,6 +183,50 @@ Frontend runs on **http://localhost:3000**
 
 ---
 
+## Deploy on Vercel
+
+This repo is a monorepo, so deploy as **two Vercel projects**:
+
+### 1) Deploy Backend (Express API)
+
+1. In Vercel, create a new project from this repo.
+2. Set **Root Directory** to `backend`.
+3. Keep defaults (Vercel will use `backend/vercel.json`).
+4. Add environment variables in Vercel Project Settings:
+  - `FIREBASE_PROJECT_ID`
+  - `FIREBASE_CLIENT_EMAIL`
+  - `FIREBASE_PRIVATE_KEY` (paste with escaped new lines: `\n`)
+  - `FRONTEND_URL` (your frontend Vercel URL)
+  - optional: `OPENAI_API_KEY`, `JUDGE0_API_URL`, `JUDGE0_API_KEY`, `ADMIN_*`
+5. Deploy and note backend URL, e.g. `https://dsa-backend.vercel.app`.
+
+Health check:
+- `https://<your-backend-domain>/api/health`
+
+### 2) Deploy Frontend (Vite React)
+
+1. Create another Vercel project from the same repo.
+2. Set **Root Directory** to `frontend`.
+3. Build command: `npm run build`
+4. Output directory: `dist`
+5. Add frontend environment variables:
+  - `VITE_API_URL=https://<your-backend-domain>/api`
+  - `VITE_FIREBASE_API_KEY`
+  - `VITE_FIREBASE_AUTH_DOMAIN`
+  - `VITE_FIREBASE_PROJECT_ID`
+  - `VITE_FIREBASE_STORAGE_BUCKET`
+  - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+  - `VITE_FIREBASE_APP_ID`
+6. Deploy.
+
+### 3) Final CORS update
+
+After frontend deploy, set backend `FRONTEND_URL` to the exact frontend Vercel URL and redeploy backend.
+
+---
+
+---
+
 ## API Endpoints
 
 | Method | Endpoint | Description | Auth |
