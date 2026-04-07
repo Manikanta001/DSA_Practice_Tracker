@@ -1,23 +1,20 @@
 const { scrapeLeetcodeProblem, fetchByProblemNumber } = require('../services/leetcodeService');
 
 const ADMIN_NAME = process.env.ADMIN_NAME || 'admin';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@dsa.com';
 const LEGACY_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const ADMIN_LOGIN_PASSWORD = process.env.ADMIN_LOGIN_PASSWORD || LEGACY_ADMIN_PASSWORD || 'admin123';
 const ADMIN_PRIVATE_PASSWORD = process.env.ADMIN_PRIVATE_PASSWORD || LEGACY_ADMIN_PASSWORD || 'admin@9878';
 
 const loginAdmin = (req, res) => {
-  const { name, email, password, privatePassword } = req.body || {};
+  const { username, password } = req.body || {};
 
-  if (!name || !email || !password || !privatePassword) {
-    return res.status(400).json({ error: 'Name, email, password, and private admin key are required' });
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password are required' });
   }
 
   const isValid =
-    name.trim().toLowerCase() === ADMIN_NAME.toLowerCase() &&
-    email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase() &&
-    password === ADMIN_LOGIN_PASSWORD &&
-    privatePassword === ADMIN_PRIVATE_PASSWORD;
+    username.trim().toLowerCase() === ADMIN_NAME.toLowerCase() &&
+    (password === ADMIN_LOGIN_PASSWORD || password === ADMIN_PRIVATE_PASSWORD);
 
   if (!isValid) {
     return res.status(401).json({ error: 'Invalid admin credentials' });

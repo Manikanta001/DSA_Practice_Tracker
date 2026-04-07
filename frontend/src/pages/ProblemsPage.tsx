@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, Filter } from 'lucide-react';
+import { defaultProblems } from '@/data/defaultProblems';
 
 const difficulties = ['All', 'Easy', 'Medium', 'Hard'];
 
@@ -43,11 +44,15 @@ export default function ProblemsPage() {
     const fetchProblems = async () => {
       try {
         const res = await api.get('/problems');
-        setProblems(res.data);
-        setFiltered(res.data);
+        const fetchedProblems = Array.isArray(res.data) && res.data.length > 0 ? res.data : defaultProblems;
+        setProblems(fetchedProblems);
+        setFiltered(fetchedProblems);
+        setFetchError('');
       } catch (err: any) {
         console.error('Failed to fetch problems:', err);
-        setFetchError(err.response?.data?.error || 'Failed to fetch problems. Please try again.');
+        setProblems(defaultProblems);
+        setFiltered(defaultProblems);
+        setFetchError('');
       } finally {
         setLoading(false);
       }

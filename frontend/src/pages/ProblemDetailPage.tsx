@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Lightbulb, Loader2, CheckCircle, CircleDashed, ExternalLink, ChevronRight, Sparkles, BookOpen, Wand2 } from 'lucide-react';
+import { defaultProblems } from '@/data/defaultProblems';
 
 export default function ProblemDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +32,8 @@ export default function ProblemDetailPage() {
         setProblem(res.data);
       } catch (err) {
         console.error('Failed to fetch problem:', err);
+        const fallbackProblem = defaultProblems.find((problem) => problem.id === id);
+        setProblem(fallbackProblem || null);
       } finally {
         setLoading(false);
       }

@@ -9,10 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Loader2, ShieldCheck } from 'lucide-react';
 
 export default function AdminLoginPage() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [privatePassword, setPrivatePassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -23,8 +21,8 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      await api.post('/admin/login', { name, email, password, privatePassword });
-      setAdminPassword(privatePassword);
+      await api.post('/admin/login', { username, password });
+      setAdminPassword(password);
       navigate('/admin/add-question');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Invalid admin credentials');
@@ -41,30 +39,19 @@ export default function AdminLoginPage() {
             <ShieldCheck className="h-10 w-10 text-primary" />
           </div>
           <CardTitle>Admin Login</CardTitle>
-          <CardDescription>Enter name, email, password, and private admin key</CardDescription>
+          <CardDescription>Enter your admin username and password</CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             {error ? <p className="rounded-md bg-destructive/10 p-2 text-sm text-destructive">{error}</p> : null}
             <div className="space-y-2">
-              <Label htmlFor="admin-name">Name</Label>
+              <Label htmlFor="admin-username">Username</Label>
               <Input
-                id="admin-name"
+                id="admin-username"
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter admin name"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="admin-email">Email</Label>
-              <Input
-                id="admin-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter admin email"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter admin username"
                 required
               />
             </div>
@@ -76,17 +63,6 @@ export default function AdminLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter admin password"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="admin-private-password">Private Admin Key</Label>
-              <Input
-                id="admin-private-password"
-                type="password"
-                value={privatePassword}
-                onChange={(e) => setPrivatePassword(e.target.value)}
-                placeholder="Enter private key (e.g. admin@9878)"
                 required
               />
             </div>
