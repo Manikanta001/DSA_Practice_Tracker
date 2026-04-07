@@ -22,9 +22,9 @@ const normalizeTopic = (topic: string) => {
 export default function ProblemsPage() {
   const { profile } = useAuth();
   const [searchParams] = useSearchParams();
-  const [problems, setProblems] = useState<any[]>([]);
-  const [filtered, setFiltered] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [problems, setProblems] = useState<any[]>(defaultProblems);
+  const [filtered, setFiltered] = useState<any[]>(defaultProblems);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [difficulty, setDifficulty] = useState('All');
   const [topic, setTopic] = useState('All');
