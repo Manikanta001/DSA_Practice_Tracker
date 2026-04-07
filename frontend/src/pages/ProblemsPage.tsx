@@ -41,17 +41,27 @@ export default function ProblemsPage() {
   }, [searchParams]);
 
   useEffect(() => {
+    // Immediately show fallback problems
+    setProblems(defaultProblems);
+    setFiltered(defaultProblems);
+    
     const fetchProblems = async () => {
       try {
+        console.log('Fetching problems from API...');
         const res = await api.get('/problems');
-        const fetchedProblems = Array.isArray(res.data) && res.data.length > 0 ? res.data : defaultProblems;
-        setProblems(fetchedProblems);
-        setFiltered(fetchedProblems);
+        console.log('API response:', res.data);
+        
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          console.log('Using API problems:', res.data.length, 'problems');
+          setProblems(res.data);
+          setFiltered(res.data);
+        } else {
+          console.log('API returned empty, keeping default problems');
+        }
         setFetchError('');
       } catch (err: any) {
         console.error('Failed to fetch problems:', err);
-        setProblems(defaultProblems);
-        setFiltered(defaultProblems);
+        console.log('API fetch failed, keeping default fallback problems');
         setFetchError('');
       } finally {
         setLoading(false);
