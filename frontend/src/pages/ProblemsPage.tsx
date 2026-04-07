@@ -28,6 +28,7 @@ export default function ProblemsPage() {
   const [difficulty, setDifficulty] = useState('All');
   const [topic, setTopic] = useState('All');
   const [bookmarks, setBookmarks] = useState<string[]>([]);
+  const [fetchError, setFetchError] = useState<string>('');
 
   const topics = ['All', ...Array.from(new Set(problems.map((p) => normalizeTopic(p.topic)))).sort()];
 
@@ -44,8 +45,9 @@ export default function ProblemsPage() {
         const res = await api.get('/problems');
         setProblems(res.data);
         setFiltered(res.data);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Failed to fetch problems:', err);
+        setFetchError(err.response?.data?.error || 'Failed to fetch problems. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -144,7 +146,7 @@ export default function ProblemsPage() {
           ))
         ) : filtered.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            No problems found matching your filters.
+            {fetchError || (problems.length === 0 ? 'No problems are available yet.' : 'No problems found matching your filters.')}
           </div>
         ) : (
           filtered.map((problem) => (

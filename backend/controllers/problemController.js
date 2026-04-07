@@ -5,6 +5,10 @@ const requiredFields = ['title', 'difficulty', 'topic', 'description'];
 // Get all problems with optional filters
 const getAllProblems = async (req, res) => {
   try {
+    if (!db) {
+      return res.status(503).json({ error: 'Database is not configured. Set Firebase Admin environment variables.' });
+    }
+
     const { difficulty, topic } = req.query;
     let query = db.collection('problems');
 
@@ -31,6 +35,10 @@ const getAllProblems = async (req, res) => {
 // Get single problem by ID
 const getProblemById = async (req, res) => {
   try {
+    if (!db) {
+      return res.status(503).json({ error: 'Database is not configured. Set Firebase Admin environment variables.' });
+    }
+
     const { id } = req.params;
     const doc = await db.collection('problems').doc(id).get();
 
