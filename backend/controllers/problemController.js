@@ -1,15 +1,36 @@
 const { db, admin } = require('../utils/firebase');
+const fallbackProblems = require('../models/defaultProblems');
 
 const requiredFields = ['title', 'difficulty', 'topic', 'description'];
+
+const normalizeTopic = (topic) => {
+  const value = (topic || '').trim();
+  if (!value) return 'General';
+  if (value.toLowerCase() === 'array') return 'Arrays';
+  if (value.toLowerCase() === 'string') return 'Strings';
+  return value;
+};
+
+const matchesQuery = (problem, difficulty, topic) => {
+  if (difficulty && problem.difficulty !== difficulty) return false;
+  if (topic && normalizeTopic(problem.topic) !== normalizeTopic(topic)) return false;
+  return true;
+};
+
+const getFallbackProblems = (difficulty, topic) =>
+  fallbackProblems
+    .filter((problem) => matchesQuery(problem, difficulty, topic))
+    .map((problem) => ({ ...problem, topic: normalizeTopic(problem.topic) }));
 
 // Get all problems with optional filters
 const getAllProblems = async (req, res) => {
   try {
+    const { difficulty, topic } = req.query;
+
     if (!db) {
-      return res.status(503).json({ error: 'Database is not configured. Set Firebase Admin environment variables.' });
+      return res.json(getFallbackProblems(difficulty, topic));
     }
 
-    const { difficulty, topic } = req.query;
     let query = db.collection('problems');
 
     if (difficulty) {
@@ -22,33 +43,55 @@ const getAllProblems = async (req, res) => {
     const snapshot = await query.get();
     const problems = [];
     snapshot.forEach((doc) => {
-      problems.push({ id: doc.id, ...doc.data() });
+      problems.push({ id: doc.id, ...doc.data(), topic: normalizeTopic(doc.data().topic) });
     });
+
+    if (problems.length === 0 && fallbackProblems.length > 0) {
+      return res.json(getFallbackProblems(difficulty, topic));
+    }
 
     res.json(problems);
   } catch (error) {
     console.error('Get problems error:', error);
-    res.status(500).json({ error: 'Failed to fetch problems' });
+    const { difficulty, topic } = req.query;
+    res.json(getFallbackProblems(difficulty, topic));
   }
 };
 
 // Get single problem by ID
 const getProblemById = async (req, res) => {
   try {
+    const { id } = req.params;
+
     if (!db) {
-      return res.status(503).json({ error: 'Database is not configured. Set Firebase Admin environment variables.' });
+      const fallbackProblem = fallbackProblems.find((problem) => problem.id === id);
+      if (!fallbackProblem) {
+        return res.status(404).json({ error: 'Problem not found' });
+      }
+
+      return res.json({ ...fallbackProblem, topic: normalizeTopic(fallbackProblem.topic) });
     }
 
-    const { id } = req.params;
     const doc = await db.collection('problems').doc(id).get();
 
     if (!doc.exists) {
+      const fallbackProblem = fallbackProblems.find((problem) => problem.id === id);
+      if (fallbackProblem) {
+        return res.json({ ...fallbackProblem, topic: normalizeTopic(fallbackProblem.topic) });
+      }
+
       return res.status(404).json({ error: 'Problem not found' });
     }
 
-    res.json({ id: doc.id, ...doc.data() });
+    res.json({ id: doc.id, ...doc.data(), topic: normalizeTopic(doc.data().topic) });
   } catch (error) {
     console.error('Get problem error:', error);
+    const { id } = req.params;
+    const fallbackProblem = fallbackProblems.find((problem) => problem.id === id);
+    if (fallbackProblem) {
+      return res.json({ ...fallbackProblem, topic: normalizeTopic(fallbackProblem.topic) });
+    }
+
     res.status(500).json({ error: 'Failed to fetch problem' });
   }
 };
